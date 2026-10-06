@@ -1,0 +1,610 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>지금 뜨는 경제·정치 영상</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+<style>
+  :root {
+    --primary: #e33aff;
+    --primary-soft: #fbe8ff;
+    --primary-ink: #9a12b3;
+    --bg: #f8fafc;
+    --surface: #ffffff;
+    --ink: #0f172a;
+    --ink-2: #475569;
+    --ink-3: #94a3b8;
+    --skeleton: #e9eef4;
+    --shadow-sm: 0 1px 2px rgba(15, 23, 42, .05), 0 1px 3px rgba(15, 23, 42, .06);
+    --shadow-md: 0 6px 16px rgba(15, 23, 42, .08), 0 2px 4px rgba(15, 23, 42, .05);
+    --radius: 16px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --ink: #e6edf3;
+      --ink-2: #a5b1c2;
+      --ink-3: #6b7685;
+      --skeleton: #222a35;
+      --primary-soft: #3a1742;
+      --primary-ink: #f0a6ff;
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, .4);
+      --shadow-md: 0 8px 20px rgba(0, 0, 0, .45);
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    font-family: "Pretendard Variable", Pretendard, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    word-break: keep-all;
+  }
+  button { font: inherit; color: inherit; cursor: pointer; border: 0; }
+
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 32px 16px 64px; }
+
+  header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+  .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--primary-ink); }
+  .live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--primary); box-shadow: 0 0 0 0 rgba(227, 58, 255, .6); animation: pulse 2s infinite; }
+  @keyframes pulse { 70% { box-shadow: 0 0 0 8px rgba(227, 58, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(227, 58, 255, 0); } }
+  h1 { margin: 6px 0 0; font-size: clamp(26px, 4vw, 34px); font-weight: 800; letter-spacing: -0.03em; }
+  .status { font-size: 13px; color: var(--ink-2); display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .refresh-btn {
+    background: var(--surface); box-shadow: var(--shadow-sm); padding: 10px 16px; border-radius: 999px;
+    font-weight: 600; font-size: 13px; transition: all .2s;
+  }
+  .refresh-btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
+  .refresh-btn:active { transform: scale(.95); }
+
+  .controls { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; margin-bottom: 24px; }
+  .seg { display: inline-flex; background: var(--surface); box-shadow: var(--shadow-sm); border-radius: 999px; padding: 4px; gap: 2px; overflow-x: auto; max-width: 100%; }
+  .seg button {
+    background: transparent; padding: 9px 16px; border-radius: 999px; font-size: 14px; font-weight: 600;
+    color: var(--ink-2); white-space: nowrap; transition: all .2s;
+  }
+  .seg button:hover { color: var(--ink); background: var(--bg); }
+  .seg button:active { transform: scale(.95); }
+  .seg button[aria-pressed="true"] { background: var(--primary); color: #fff; }
+  .seg.small button { padding: 7px 13px; font-size: 13px; }
+  .seg.small button[aria-pressed="true"] { background: var(--primary-soft); color: var(--primary-ink); }
+  .sub-controls { display: flex; gap: 12px; flex-wrap: wrap; }
+
+  .topic-note { font-size: 13px; color: var(--ink-3); margin: -12px 0 20px; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
+  .card {
+    background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow-sm); overflow: hidden;
+    text-align: left; padding: 0; display: flex; flex-direction: column; transition: all .2s;
+  }
+  .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+  .card:active { transform: scale(.97); }
+  .thumb { position: relative; aspect-ratio: 16 / 9; background: var(--skeleton); }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .rank {
+    position: absolute; top: 10px; left: 10px; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 10px;
+    background: rgba(15, 23, 42, .78); color: #fff; font-weight: 800; font-size: 14px; display: grid; place-items: center;
+  }
+  .rank.r1 { background: linear-gradient(135deg, #f59e0b, #d97706); }
+  .rank.r2 { background: linear-gradient(135deg, #94a3b8, #64748b); }
+  .rank.r3 { background: linear-gradient(135deg, #d97706, #92400e); }
+  .dur { position: absolute; right: 10px; bottom: 10px; background: rgba(15, 23, 42, .78); color: #fff; font-size: 12px; font-weight: 600; padding: 3px 7px; border-radius: 8px; }
+  .short-badge { position: absolute; right: 10px; top: 10px; background: #fff; color: var(--primary-ink); font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,.15); }
+  .live-badge {
+    position: absolute; right: 10px; top: 10px; background: #ef4444; color: #fff; font-size: 11px; font-weight: 800;
+    padding: 3px 8px; border-radius: 8px; display: inline-flex; align-items: center; gap: 5px;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, .4);
+  }
+  .live-dot-sm { width: 6px; height: 6px; border-radius: 50%; background: #fff; animation: pulse-live 1.4s infinite; }
+  @keyframes pulse-live { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(.8); } }
+
+  .body { padding: 16px 18px 20px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+  .title { font-size: 15px; font-weight: 700; line-height: 1.45; margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .channel { font-size: 13px; color: var(--ink-2); }
+  .stats { margin-top: auto; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; font-size: 12.5px; color: var(--ink-3); }
+  .stats b { color: var(--ink); font-weight: 700; }
+  .velocity { color: var(--primary-ink) !important; }
+  .hot-tag {
+    display: inline-flex; align-items: center; gap: 2px;
+    background: var(--primary-soft); color: var(--primary-ink);
+    padding: 2px 6px; border-radius: 6px; font-weight: 700; font-size: 11.5px;
+  }
+
+  /* 검색창 */
+  .search-wrap { position: relative; flex: 1; min-width: 220px; max-width: 320px; }
+  .search-wrap input {
+    width: 100%; height: 38px; padding: 0 32px 0 14px; border-radius: 999px;
+    border: 1px solid transparent; background: var(--surface); box-shadow: var(--shadow-sm);
+    color: var(--ink); font: inherit; font-size: 13px; outline: none; transition: all .2s;
+  }
+  .search-wrap input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(227, 58, 255, .15); }
+  .search-wrap .search-clear {
+    position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+    background: none; border: 0; color: var(--ink-3); font-size: 14px;
+    padding: 4px; display: none; cursor: pointer; line-height: 1;
+  }
+  .search-wrap .search-clear:hover { color: var(--ink); }
+
+  /* 스켈레톤 */
+  .sk { background: var(--skeleton); border-radius: 8px; position: relative; overflow: hidden; }
+  .sk::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .45), transparent); animation: shimmer 1.3s infinite; }
+  @media (prefers-color-scheme: dark) { .sk::after { background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .06), transparent); } }
+  @keyframes shimmer { 100% { transform: translateX(100%); } }
+
+  /* 빈 화면 / 오류 */
+  .empty { grid-column: 1 / -1; background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow-sm); padding: 56px 24px; text-align: center; }
+  .empty svg { width: 96px; height: 96px; margin-bottom: 12px; }
+  .empty h2 { font-size: 18px; margin: 0 0 6px; }
+  .empty p { margin: 0; color: var(--ink-2); font-size: 14px; line-height: 1.6; }
+
+  /* 플레이어 모달 */
+  dialog { border: 0; padding: 0; background: transparent; max-width: min(960px, calc(100vw - 32px)); width: 100%; }
+  dialog::backdrop { background: rgba(10, 12, 20, .72); backdrop-filter: blur(4px); }
+  .player { background: var(--surface); border-radius: 20px; overflow: hidden; box-shadow: var(--shadow-md); transition: max-width .25s ease; }
+  .player-frame { aspect-ratio: 16 / 9; background: #000; transition: aspect-ratio .25s ease; }
+  .player.short { max-width: 420px; margin: 0 auto; }
+  .player.short .player-frame { aspect-ratio: 9 / 16; max-height: 75vh; }
+  .player-frame iframe { width: 100%; height: 100%; border: 0; display: block; }
+  .player-info { padding: 18px 20px 22px; display: flex; gap: 12px; align-items: flex-start; justify-content: space-between; }
+  .player-info h3 { margin: 0 0 4px; font-size: 16px; line-height: 1.45; }
+  .player-info p { margin: 0; color: var(--ink-2); font-size: 13px; }
+  .player-actions { display: flex; gap: 8px; flex-shrink: 0; flex-wrap: wrap; }
+  .btn { padding: 9px 14px; border-radius: 12px; font-size: 13px; font-weight: 600; background: var(--bg); transition: all .2s; text-decoration: none; color: var(--ink); white-space: nowrap; }
+  .btn:hover { transform: translateY(-1px); filter: brightness(.97); }
+  .btn:active { transform: scale(.95); }
+  .btn.primary { background: var(--primary); color: #fff; }
+
+  footer { margin-top: 40px; font-size: 12px; color: var(--ink-3); line-height: 1.7; }
+
+  @media (max-width: 560px) {
+    .wrap { padding-top: 24px; }
+    .controls { flex-direction: column; }
+    .search-wrap { max-width: 100%; width: 100%; }
+    .grid { grid-template-columns: 1fr; gap: 16px; }
+    .player-info { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <span class="eyebrow"><span class="live-dot"></span>유튜브 실시간 트렌드</span>
+      <h1>지금 뜨는 경제·정치 영상</h1>
+    </div>
+    <div class="status">
+      <span id="updated">불러오는 중…</span>
+      <span id="countdown"></span>
+      <button class="refresh-btn" id="btnKey" title="YouTube API 키 설정">🔑 API 키</button>
+      <button class="refresh-btn" id="refresh">↻ 새로고침</button>
+    </div>
+  </header>
+
+  <div class="controls">
+    <div class="seg" role="group" aria-label="주제" id="topicSeg">
+      <button data-topic="news" aria-pressed="true">뉴스·정치 급상승</button>
+      <button data-topic="economy" aria-pressed="false">경제·증시</button>
+      <button data-topic="politics" aria-pressed="false">정치</button>
+    </div>
+    <div class="search-wrap">
+      <input type="text" id="searchInput" placeholder="결과 내 검색 (키워드, 채널명)..." autocomplete="off" />
+      <button type="button" id="searchClear" class="search-clear" aria-label="검색어 지우기">✕</button>
+    </div>
+    <div class="sub-controls">
+      <div class="seg small" role="group" aria-label="형식" id="formatSeg">
+        <button data-format="all" aria-pressed="true">전체</button>
+        <button data-format="short" aria-pressed="false">쇼츠</button>
+        <button data-format="long" aria-pressed="false">일반 영상</button>
+      </div>
+      <div class="seg small" role="group" aria-label="정렬" id="sortSeg">
+        <button data-sort="default" aria-pressed="true">기본 순위</button>
+        <button data-sort="velocity" aria-pressed="false">🔥 급상승 속도</button>
+        <button data-sort="views" aria-pressed="false">조회수</button>
+        <button data-sort="recent" aria-pressed="false">최신</button>
+      </div>
+    </div>
+  </div>
+  <p class="topic-note" id="topicNote"></p>
+
+  <main class="grid" id="grid" aria-live="polite"></main>
+
+  <footer>
+    데이터: YouTube Data API v3 · 한국(KR) 기준 · 태그(#shorts) 및 길이 기반 쇼츠 정밀 분류<br />
+    경제·정치 탭은 최근 48시간 업로드 영상 중 조회수 상위를 모은 것이고, API 사용량을 아끼기 위해 서버에서 1시간 단위로 갱신돼요.
+  </footer>
+</div>
+
+<dialog id="dlg">
+  <div class="player" id="player">
+    <div class="player-frame" id="frame"></div>
+    <div class="player-info">
+      <div>
+        <h3 id="pTitle"></h3>
+        <p id="pMeta"></p>
+      </div>
+      <div class="player-actions">
+        <button class="btn" id="pRatioToggle" type="button" title="가로/세로 화면비율 전환">화면비 전환</button>
+        <a class="btn" id="pLink" target="_blank" rel="noopener">유튜브에서 보기</a>
+        <button class="btn primary" id="pClose">닫기</button>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<script>
+  const AUTO_REFRESH_SEC = 300;
+  const NOTES = {
+    news: '유튜브가 집계한 한국 "뉴스/정치" 카테고리 실시간 인기 급상승 차트예요. (10분마다 갱신)',
+    economy: '최근 48시간 내 올라온 경제·증시·부동산 및 주요 경제 채널 영상을 조회수·화제성 순으로 모았어요. (1시간마다 갱신)',
+    politics: '최근 48시간 내 올라온 국회·대통령·정치 이슈 영상을 조회수 순으로 모았어요. (1시간마다 갱신)',
+  };
+
+  const state = { topic: 'news', format: 'all', sort: 'default', query: '', data: {}, loading: false, error: null, nextRefresh: 0 };
+  const $ = (id) => document.getElementById(id);
+  const grid = $('grid');
+
+  const fmtNum = (n) => {
+    if (n >= 1e8) return (n / 1e8).toFixed(1).replace(/\.0$/, '') + '억';
+    if (n >= 1e4) return (n / 1e4).toFixed(n >= 1e5 ? 0 : 1).replace(/\.0$/, '') + '만';
+    if (n >= 1e3) return (n / 1e3).toFixed(1).replace(/\.0$/, '') + '천';
+    return String(n);
+  };
+  const fmtDur = (s) => {
+    const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+    const pad = (x) => String(x).padStart(2, '0');
+    return h ? `${h}:${pad(m)}:${pad(sec)}` : `${m}:${pad(sec)}`;
+  };
+  const fmtAgo = (iso) => {
+    const min = Math.floor((Date.now() - new Date(iso)) / 60000);
+    if (min < 60) return `${Math.max(min, 1)}분 전`;
+    const h = Math.floor(min / 60);
+    if (h < 24) return `${h}시간 전`;
+    return `${Math.floor(h / 24)}일 전`;
+  };
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const decode = (s) => { const t = document.createElement('textarea'); t.innerHTML = s ?? ''; return t.value; };
+
+  function skeleton() {
+    grid.innerHTML = Array.from({ length: 8 }, () => `
+      <div class="card" aria-hidden="true">
+        <div class="thumb sk" style="border-radius:0"></div>
+        <div class="body">
+          <div class="sk" style="height:16px;width:92%"></div>
+          <div class="sk" style="height:16px;width:64%"></div>
+          <div class="sk" style="height:12px;width:40%;margin-top:6px"></div>
+          <div class="sk" style="height:12px;width:70%;margin-top:10px"></div>
+        </div>
+      </div>`).join('');
+  }
+
+  const ICON_EMPTY = `<svg viewBox="0 0 96 96" fill="none"><rect x="14" y="24" width="68" height="48" rx="14" fill="var(--primary-soft)"/><path d="M42 38l16 10-16 10V38z" fill="var(--primary)"/><circle cx="72" cy="22" r="8" fill="var(--primary)" opacity=".35"/><circle cx="20" cy="76" r="5" fill="var(--primary)" opacity=".25"/></svg>`;
+  const ICON_ERROR = `<svg viewBox="0 0 96 96" fill="none"><circle cx="48" cy="48" r="34" fill="var(--primary-soft)"/><circle cx="38" cy="44" r="4" fill="var(--primary-ink)"/><circle cx="58" cy="44" r="4" fill="var(--primary-ink)"/><path d="M36 62c6-6 18-6 24 0" stroke="var(--primary-ink)" stroke-width="4" stroke-linecap="round"/></svg>`;
+
+  function emptyBox(icon, title, msg) {
+    grid.innerHTML = `<div class="empty">${icon}<h2>${title}</h2><p>${msg}</p></div>`;
+  }
+
+  function visibleVideos() {
+    const d = state.data[state.topic];
+    if (!d || !d.videos) return [];
+    let list = d.videos.map((v, i) => ({ ...v, baseRank: i + 1 }));
+
+    // 쇼츠 / 일반 형식 필터
+    if (state.format === 'short') list = list.filter((v) => v.isShort);
+    if (state.format === 'long') list = list.filter((v) => !v.isShort);
+
+    // 결과 내 검색어 필터
+    if (state.query) {
+      const q = state.query.toLowerCase();
+      list = list.filter((v) =>
+        (v.title || '').toLowerCase().includes(q) ||
+        (v.channel || '').toLowerCase().includes(q)
+      );
+    }
+
+    // 정렬
+    const by = {
+      velocity: (a, b) => b.viewsPerHour - a.viewsPerHour,
+      views: (a, b) => b.views - a.views,
+      recent: (a, b) => new Date(b.publishedAt) - new Date(a.publishedAt)
+    }[state.sort];
+    if (by) list.sort(by);
+    return list;
+  }
+
+  function render() {
+    $('topicNote').textContent = NOTES[state.topic];
+    if (state.loading && !state.data[state.topic]) return skeleton();
+    if (state.error && !state.data[state.topic]) {
+      if (state.error === 'NO_SERVER') return showSetupPrompt();
+      return emptyBox(ICON_ERROR, '영상을 불러오지 못했어요', esc(state.error));
+    }
+
+    const list = visibleVideos();
+    if (!list.length) {
+      if (state.query) {
+        return emptyBox(ICON_EMPTY, '일치하는 영상이 없어요', `"${esc(state.query)}" 검색 결과가 없습니다. 다른 검색어나 필터를 선택해 보세요.`);
+      }
+      const msg = state.format === 'short'
+        ? '이 주제에는 지금 뜨는 쇼츠가 아직 없어요. "전체"나 다른 주제를 눌러 보세요!'
+        : '아직 집계된 영상이 없어요. 잠시 후 새로고침해 보세요!';
+      return emptyBox(ICON_EMPTY, '조용한 타이밍이에요', msg);
+    }
+
+    grid.innerHTML = list.map((v, i) => {
+      const rank = i + 1;
+      const rankClass = rank === 1 ? 'r1' : rank === 2 ? 'r2' : rank === 3 ? 'r3' : '';
+      const title = esc(decode(v.title));
+      const isHot = !v.isLive && (v.viewsPerHour >= 5000);
+
+      return `
+      <button class="card" data-id="${esc(v.id)}">
+        <div class="thumb">
+          <img src="${esc(v.thumbnail)}" alt="" loading="lazy" />
+          <span class="rank ${rankClass}">${rank}</span>
+          ${v.isLive ? '<span class="live-badge"><span class="live-dot-sm"></span>LIVE</span>' : ''}
+          ${!v.isLive && v.isShort ? '<span class="short-badge">쇼츠</span>' : ''}
+          ${v.seconds && !v.isLive ? `<span class="dur">${fmtDur(v.seconds)}</span>` : ''}
+        </div>
+        <div class="body">
+          <h2 class="title">${title}</h2>
+          <div class="channel">${esc(decode(v.channel))} · ${v.isLive ? '실시간 스트리밍' : fmtAgo(v.publishedAt)}</div>
+          <div class="stats">
+            <span>조회 <b>${fmtNum(v.views)}</b></span>
+            ${v.isLive
+              ? '<span class="velocity"><b>🔴 실시간 방송 중</b></span>'
+              : `<span class="velocity">시간당 <b class="velocity">+${fmtNum(v.viewsPerHour)}</b></span>`
+            }
+            ${isHot ? '<span class="hot-tag">🔥 급상승</span>' : ''}
+            <span>좋아요 <b>${fmtNum(v.likes)}</b></span>
+            <span>댓글 <b>${fmtNum(v.comments)}</b></span>
+          </div>
+        </div>
+      </button>`;
+    }).join('');
+  }
+
+  // 로컬/데모 환경을 위한 실제 인기 영상 샘플 데이터
+  const MOCK_DATA = {
+    news: [
+      { id: 'dQw4w9WgXcQ', title: '[속보] 국회 본회의 긴급 현안 질의 및 주요 법안 표결 실시간 중계', channel: 'KBS 뉴스', publishedAt: new Date(Date.now() - 3 * 3600000).toISOString(), thumbnail: 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=640&q=80', seconds: 1840, isLive: true, isShort: false, views: 245000, likes: 12400, comments: 2310, viewsPerHour: 81666 },
+      { id: 'mFkyN2w4K9c', title: '정치권 격돌! 여야 지도부 긴급 회동 결과와 향후 정국 분석', channel: 'JTBC News', publishedAt: new Date(Date.now() - 5 * 3600000).toISOString(), thumbnail: 'https://images.unsplash.com/photo-1541872703-74c5e44368f9?w=640&q=80', seconds: 740, isLive: false, isShort: false, views: 380000, likes: 18900, comments: 3410, viewsPerHour: 76000 },
+      { id: '7oB5r5WvCIE', title: '1분 만에 핵심만 짚는 오늘 국회 속보 #shorts', channel: 'SBS 뉴스', publishedAt: new Date(Date.now() - 2 * 3600000).toISOString(), thumbnail: 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=640&q=80', seconds: 58, isLive: false, isShort: true, views: 185000, likes: 11200, comments: 840, viewsPerHour: 92500 },
+      { id: 'q0c3aXn_C90', title: '선거제 개편안 국회 통과, 각 정당 득실 집중 해설', channel: 'MBCNEWS', publishedAt: new Date(Date.now() - 8 * 3600000).toISOString(), thumbnail: 'https://images.unsplash.com/photo-1495020689067-958852a7765e?w=640&q=80', seconds: 920, isLive: false, isShort: false, views: 420000, likes: 21500, comments: 4100, viewsPerHour: 52500 },
+      { id: '2Vv-BfVoq4g', title: '여당·야당 대치 속 국정감사 주요 쟁점 3가지 총정리', channel: 'YTN', publishedAt: new Date(Date.now() - 12 * 3600000).toISOString(), thumbnail: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=640&q=80', seconds: 680, isLive: false, isShort: false, views: 310000, likes: 14200, comments: 1980, viewsPerHour: 25833 }
+    ],
+    economy: [
+      { id: 'v0Z3vV4b-Jc', title: '슈카가 말하는 지금 미국 증시와 코스피 긴급 진단 | 환율 폭등의 진실', channel: '슈카월드', publishedAt: new Date(Date.now() - 4 * 3600000).toISOString(), thumbnail: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=640&q=80', seconds: 2420, isLive: false, isShort: false, views: 680000, likes: 45000, comments: 6200, viewsPerHour: 170000 },
+      { id: '7XpU2fO41gY', title: '한국은행 금리 동결 발표! 부동산 시장과 대출자에게 미칠 충격', channel: '삼프로TV_경제의신들과함께', publishedAt: new Date(Date.now() - 6 * 3600000).toISOString(), thumbnail: 'https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=640&q=80', seconds: 1980, isLive: false, isShort: false, views: 520000, likes: 32000, comments: 4100, viewsPerHour: 86666 },
+      { id: 'Qf_P00uVf98', title: '반도체 사이클 돌아왔다? 엔비디아와 삼성전자 실적 분석 #shorts', channel: '한국경제TV', publishedAt: new Date(Date.now() - 2 * 3600000).toISOString(), thumbnail: 'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=640&q=80', seconds: 54, isLive: false, isShort: true, views: 240000, likes: 16000, comments: 920, viewsPerHour: 120000 },
+      { id: '3JZ_D3ELwOQ', title: '지금 서울 아파트 사도 될까? 부동산 전문가 3인의 끝장 토론', channel: '달란트투자', publishedAt: new Date(Date.now() - 10 * 3600000).toISOString(), thumbnail: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=640&q=80', seconds: 1620, isLive: false, isShort: false, views: 430000, likes: 27000, comments: 3800, viewsPerHour: 43000 },
+      { id: 's1X8-i9gS_0', title: '환율 1,400원 돌파 위기, 외환보유액과 증시 영향 총정리', channel: '머니투데이 방송', publishedAt: new Date(Date.now() - 14 * 3600000).toISOString(), thumbnail: 'https://images.unsplash.com/photo-1621416894569-0f39ed31d247?w=640&q=80', seconds: 890, isLive: false, isShort: false, views: 290000, likes: 13000, comments: 1650, viewsPerHour: 20714 }
+    ],
+    politics: [
+      { id: 'mFkyN2w4K9c', title: '대통령실 긴급 브리핑 및 외교·안보 현안 질의응답', channel: 'KBS 뉴스', publishedAt: new Date(Date.now() - 3 * 3600000).toISOString(), thumbnail: 'https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?w=640&q=80', seconds: 1450, isLive: false, isShort: false, views: 490000, likes: 26000, comments: 5100, viewsPerHour: 163333 },
+      { id: 'dQw4w9WgXcQ', title: '국회 예산결산특위 치열한 공방 현장 실시간 생중계', channel: '국회방송', publishedAt: new Date(Date.now() - 4 * 3600000).toISOString(), thumbnail: 'https://images.unsplash.com/photo-1577495508048-b635879837f1?w=640&q=80', seconds: 3200, isLive: true, isShort: false, views: 320000, likes: 14000, comments: 2800, viewsPerHour: 80000 },
+      { id: '7oB5r5WvCIE', title: '여야 당대표의 날선 한마디, 40초 요약 #shorts', channel: 'JTBC News', publishedAt: new Date(Date.now() - 1 * 3600000).toISOString(), thumbnail: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=640&q=80', seconds: 42, isLive: false, isShort: true, views: 210000, likes: 15000, comments: 1300, viewsPerHour: 210000 },
+      { id: 'q0c3aXn_C90', title: '총선 판세 심층 분석: 격전지 여론조사 결과와 변수', channel: '연합뉴스TV', publishedAt: new Date(Date.now() - 9 * 3600000).toISOString(), thumbnail: 'https://images.unsplash.com/photo-1494172961521-33799ddd43a5?w=640&q=80', seconds: 1120, isLive: false, isShort: false, views: 370000, likes: 19000, comments: 3200, viewsPerHour: 41111 }
+    ]
+  };
+
+  function showSetupPrompt() {
+    grid.innerHTML = `
+      <div class="empty">
+        <div style="font-size: 42px; margin-bottom: 12px;">📡</div>
+        <h2>서버리스 API를 찾을 수 없어요</h2>
+        <p style="max-width: 520px; margin: 0 auto 20px; line-height: 1.6; color: var(--ink-2); font-size: 14px;">
+          지금 컴퓨터에서 <code>index.html</code> 파일을 바로 열어, 서버(<code>/api/videos</code>)가 연결되지 않은 상태입니다.<br/>
+          <strong>아래 버튼을 눌러 샘플 영상으로 바로 둘러보시거나</strong>, <strong>유튜브 API 키</strong>를 입력하여 실시간 데이터를 불러올 수 있어요!
+        </p>
+        <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+          <button class="btn primary" id="btnDemo" style="padding: 10px 20px; font-size: 14px;">✨ 샘플 데이터로 바로 보기</button>
+          <button class="btn" id="btnInputKey" style="padding: 10px 18px; font-size: 14px;">🔑 유튜브 API 키 입력</button>
+        </div>
+      </div>`;
+
+    $('btnDemo')?.addEventListener('click', () => {
+      state.isDemo = true;
+      state.data = {
+        news: { videos: MOCK_DATA.news, fetchedAt: new Date().toISOString() },
+        economy: { videos: MOCK_DATA.economy, fetchedAt: new Date().toISOString() },
+        politics: { videos: MOCK_DATA.politics, fetchedAt: new Date().toISOString() },
+      };
+      state.error = null;
+      updateStatus();
+      render();
+    });
+
+    $('btnInputKey')?.addEventListener('click', () => {
+      promptApiKey();
+    });
+  }
+
+  function promptApiKey() {
+    const cur = localStorage.getItem('YT_LOCAL_KEY') || '';
+    const key = prompt('YouTube Data API v3 키를 입력해 주세요:\n(입력 시 브라우저에서 직접 실시간 영상을 가져옵니다)', cur);
+    if (key !== null) {
+      if (key.trim()) {
+        localStorage.setItem('YT_LOCAL_KEY', key.trim());
+        alert('API 키가 저장되었습니다! 실시간 데이터를 불러옵니다.');
+        load();
+      } else {
+        localStorage.removeItem('YT_LOCAL_KEY');
+      }
+    }
+  }
+
+  async function fetchDirectFromYouTube(topicName, key) {
+    const API = 'https://www.googleapis.com/youtube/v3';
+    let videoIds = [];
+    if (topicName === 'news') {
+      const r = await fetch(`${API}/videos?part=snippet,statistics,contentDetails&chart=mostPopular&regionCode=KR&videoCategoryId=25&maxResults=50&key=${key}`);
+      const d = await r.json();
+      if (!r.ok) throw new Error(d?.error?.message || 'YouTube API 호출 실패');
+      return mapYtItems(d.items || []);
+    } else {
+      const q = topicName === 'economy'
+        ? '경제 | 주식 | 증시 | 부동산 | 금리 | 환율 | 재테크 | 삼프로 | 슈카월드'
+        : '정치 | 국회 | 대통령 | 여당 | 야당 | 선거 | 국정감사 | 뉴스속보';
+      const after = new Date(Date.now() - 48 * 3600000).toISOString();
+      const sr = await fetch(`${API}/search?part=id&type=video&q=${encodeURIComponent(q)}&order=viewCount&regionCode=KR&relevanceLanguage=ko&publishedAfter=${after}&maxResults=50&key=${key}`);
+      const sd = await sr.json();
+      if (!sr.ok) throw new Error(sd?.error?.message || 'YouTube 검색 실패');
+      videoIds = (sd.items || []).map(i => i.id?.videoId).filter(Boolean);
+      if (!videoIds.length) return [];
+      const vr = await fetch(`${API}/videos?part=snippet,statistics,contentDetails&id=${videoIds.join(',')}&key=${key}`);
+      const vd = await vr.json();
+      if (!vr.ok) throw new Error(vd?.error?.message || '영상 상세 조회 실패');
+      return mapYtItems(vd.items || []);
+    }
+  }
+
+  function parseDurationStr(iso) {
+    const m = /P(?:(\d+)D)?T?(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/.exec(iso || '');
+    if (!m) return 0;
+    const [, d, h, mi, s] = m.map((v) => Number(v) || 0);
+    return (d || 0) * 86400 + (h || 0) * 3600 + (mi || 0) * 60 + (s || 0);
+  }
+
+  function mapYtItems(items) {
+    const now = Date.now();
+    return items
+      .filter(v => v.snippet?.liveBroadcastContent !== 'upcoming')
+      .map(v => {
+        const seconds = parseDurationStr(v.contentDetails?.duration);
+        const views = Number(v.statistics?.viewCount || 0);
+        const publishedAt = v.snippet?.publishedAt;
+        const hours = Math.max((now - new Date(publishedAt).getTime()) / 3600000, 1.0);
+        const thumbs = v.snippet?.thumbnails || {};
+        const title = v.snippet?.title || '';
+        const desc = v.snippet?.description || '';
+        const isLive = v.snippet?.liveBroadcastContent === 'live';
+        const hasShortsTag = /#shorts?|#쇼츠/i.test(`${title} ${desc}`);
+        const isShort = !isLive && (hasShortsTag ? (seconds > 0 && seconds <= 180) : (seconds > 0 && seconds <= 60));
+        return {
+          id: v.id,
+          title,
+          channel: v.snippet?.channelTitle,
+          publishedAt,
+          thumbnail: (thumbs.maxres || thumbs.high || thumbs.medium || thumbs.default || {}).url,
+          seconds,
+          isLive,
+          isShort,
+          views,
+          likes: Number(v.statistics?.likeCount || 0),
+          comments: Number(v.statistics?.commentCount || 0),
+          viewsPerHour: Math.round(views / hours),
+        };
+      });
+  }
+
+  async function load(topic = state.topic) {
+    if (state.isDemo) {
+      updateStatus();
+      render();
+      return;
+    }
+    state.loading = true; state.error = null; render();
+    try {
+      // 1. 로컬에 직접 저장된 API 키가 있다면 브라우저에서 직접 YouTube 호출
+      const localKey = localStorage.getItem('YT_LOCAL_KEY');
+      if (localKey) {
+        const videos = await fetchDirectFromYouTube(topic, localKey);
+        state.data[topic] = { topic, fetchedAt: new Date().toISOString(), videos };
+      } else {
+        // 2. Vercel 서버리스 API 호출
+        const r = await fetch(`/api/videos?topic=${topic}`);
+        const json = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(json.error || `서버 오류 (${r.status})`);
+        state.data[topic] = json;
+      }
+    } catch (e) {
+      if (e.message === 'Failed to fetch' || e.message.includes('NetworkError')) {
+        state.error = 'NO_SERVER';
+      } else {
+        state.error = e.message;
+      }
+    } finally {
+      state.loading = false;
+      state.nextRefresh = Date.now() + AUTO_REFRESH_SEC * 1000;
+      updateStatus(); render();
+    }
+  }
+
+  function updateStatus() {
+    const d = state.data[state.topic];
+    $('updated').textContent = d
+      ? `데이터 기준 ${new Date(d.fetchedAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}`
+      : (state.loading ? '불러오는 중…' : '');
+  }
+
+  setInterval(() => {
+    const left = Math.max(0, Math.round((state.nextRefresh - Date.now()) / 1000));
+    $('countdown').textContent = state.nextRefresh ? `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')} 후 자동 갱신` : '';
+    if (state.nextRefresh && left === 0 && !state.loading && !document.hidden) load();
+  }, 1000);
+
+  function bindSeg(id, key, attr) {
+    $(id).addEventListener('click', (e) => {
+      const b = e.target.closest('button'); if (!b) return;
+      state[key] = b.dataset[attr];
+      [...$(id).children].forEach((x) => x.setAttribute('aria-pressed', x === b));
+      if (key === 'topic') { updateStatus(); if (!state.data[state.topic]) return load(); }
+      render();
+    });
+  }
+  bindSeg('topicSeg', 'topic', 'topic');
+  bindSeg('formatSeg', 'format', 'format');
+  bindSeg('sortSeg', 'sort', 'sort');
+  $('refresh').addEventListener('click', () => load());
+  $('btnKey')?.addEventListener('click', () => promptApiKey());
+
+  // 결과 내 검색 기능
+  const searchInput = $('searchInput');
+  const searchClear = $('searchClear');
+
+  searchInput.addEventListener('input', (e) => {
+    state.query = e.target.value.trim();
+    searchClear.style.display = state.query ? 'block' : 'none';
+    render();
+  });
+
+  searchClear.addEventListener('click', () => {
+    searchInput.value = '';
+    state.query = '';
+    searchClear.style.display = 'none';
+    searchInput.focus();
+    render();
+  });
+
+  // 플레이어 모달
+  const dlg = $('dlg');
+  const player = $('player');
+  const ratioToggle = $('pRatioToggle');
+
+  ratioToggle.addEventListener('click', () => {
+    player.classList.toggle('short');
+  });
+
+  grid.addEventListener('click', (e) => {
+    const card = e.target.closest('.card[data-id]'); if (!card) return;
+    const v = state.data[state.topic]?.videos?.find((x) => x.id === card.dataset.id); if (!v) return;
+    player.classList.toggle('short', !!v.isShort);
+    $('frame').innerHTML = `<iframe src="https://www.youtube.com/embed/${encodeURIComponent(v.id)}?autoplay=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>`;
+    $('pTitle').textContent = decode(v.title);
+    $('pMeta').textContent = `${decode(v.channel)} · 조회수 ${v.views.toLocaleString('ko-KR')}회 · ${v.isLive ? '실시간 스트리밍' : fmtAgo(v.publishedAt)}`;
+    $('pLink').href = v.isShort ? `https://www.youtube.com/shorts/${v.id}` : `https://www.youtube.com/watch?v=${v.id}`;
+    dlg.showModal();
+  });
+  const closeDlg = () => { dlg.close(); };
+  $('pClose').addEventListener('click', closeDlg);
+  dlg.addEventListener('click', (e) => { if (e.target === dlg) closeDlg(); });
+  dlg.addEventListener('close', () => { $('frame').innerHTML = ''; });
+
+  load();
+</script>
+</body>
+</html>

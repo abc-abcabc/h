@@ -1,0 +1,6 @@
+{
+  "name": "hot-econ-politics-videos",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=18" }
+}
